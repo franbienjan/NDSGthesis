@@ -1,0 +1,15 @@
+Thesis 1: DeDu: Building a Deduplication Storage System over Cloud Computing
+	- This thesis talks about managing cloud storage with data deduplication.
+
+Problem: The size of digital files throughout the globe is 281 exabytes in 2007 and is expected to become 10 times larger in 2011 and in time, the rapid growth of files cannot be handled properly.
+
+Goal: To remove redundant data and reduce cloud storage with a system.
+
+
+Main idea to approach:
+	- if a file is not yet uploaded in the cloud, the user will upload the file and will be given a link for that file, but if the file is previously uploaded by another user, the user will just get the link from the file uploaded by the first
+	- the user is only able to read the file not write (reusing of files)
+
+Approaches:
+	1. Identifying the application
+	
