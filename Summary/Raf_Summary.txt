@@ -8,8 +8,53 @@ Goal: To remove redundant data and reduce cloud storage with a system.
 
 Main idea to approach:
 	- if a file is not yet uploaded in the cloud, the user will upload the file and will be given a link for that file, but if the file is previously uploaded by another user, the user will just get the link from the file uploaded by the first
+	- a database is used (HBase)
 	- the user is only able to read the file not write (reusing of files)
 
 Approaches:
-	1. Identifying the application
+	1) Identifying the application
 	
+		There are 2 ways of identifying the application:
+		a) Comparing blocks or files bit by bit 
+			- the problem with this one is that file checking is accurate but a bit demanding on the computation time
+			
+		b) Comparing blocks by hash values
+			- is very fast compared to (a) but there is a chance of having accidental collisions (though it is only very small).
+			- they used a combination of md5 and sha-1 to greatly reduce the chances
+	
+		2 levels for comparisons: file and chunk level
+		
+		The level they used is file level since the chunk level divides the file into chunks which requires more hashes and more lookups which has more drawbacks than the file level.
+		
+		
+	2) Storage mechanism
+		There are 2 storages required for the system and these 2 are mass data and for the indexing.
+		
+System:
+	The files are just links to the source files to each user. The users that doesn't have the file will just have the "read" privilege, without "write". And as for deletion of files, the files stored in the cloud won't be deleted until the last one who has the file hasn't deleted his/her yet.
+	
+Conclusion:
+	After the experiments, these are the conclusions brought about:
+	1. The fewer the data nodes, the higher the writing efficiency; but the lower the reading efficiency;
+	2. The more data nodes there are, the lower the writing efficiency, but the higher the reading efficiency;
+	3. When a single file is big, the time to calculate hash values becomes higher, but the time of transmission cost is low;	
+	4. When a single file is small, the time to calculate hash values becomes lower, but the transmission cost is high.
+	
+	A new scalable and parallel deduplicated storage "DeDu" was introduced. It was shown that 110,000 files (with 475.2GB in size) resulted to 38.1GB after deduplications and other processes. For a perfect deduplication, the result should be 37GB but because of the hashes came an additional 1.1GB which is still comparable and plausible.
+
+===============================================================================================
+
+Thesis 2: Deduplication and Compression Techniques in Cloud Design
+
+Problem: Similar to the first problem which is also the size of the universal digital storage, but with file transfer reduction / compression.
+
+Main idea: Reducing file storage and bandwidth usage.
+
+	This thesis is focused on a new architecture using segmentation, compression and binning including multiple metadata structures to present better lookups for search.
+	
+System architecture and development:
+
+Sources:
+	http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=5960097
+	http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=6189472
+	http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=6061046
