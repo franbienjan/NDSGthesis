@@ -53,6 +53,48 @@ Main idea: Reducing file storage and bandwidth usage.
 	This thesis is focused on a new architecture using segmentation, compression and binning including multiple metadata structures to present better lookups for search.
 	
 System architecture and development:
+	*Block level deduplication is used in the system.
+	The basic idea here is that the file blocks are divided into segments that are put in bins (depending on the size of the file) that will arrange data to fit as best as possible with the allocation given. This helps in optimizing the number of segments created and the size alloted to. There are functionalities namely mapping, binning, comparison and compression. Each has its own part in contributing to the deduplication process.
+	If a file is uploaded, hash values will be calculated for the segment of the file and then compare with the existing hashes. If there is a match from the existing hashes, then the file is considered to be a duplicate. Only the configuration file will be updated; this keeps a count on the number of segments for each bin.
+	
+Conclusion:
+	The experiment turned out to be successful since the size of the files before the duplication is larger than the size of the files after it.
+	From test runs, for text files, it was concluded that 51%  is saved after deduplication. For image files is 10% while for medie files is 12%. Overall, more than 80% storage space was saved when duplicate binary files were present.
+
+===============================================================================================
+
+Thesis 3:AA-Dedupe: An Application-Aware Source Deduplication Approach for Cloud Backup Services in the Personal Computing Environment
+
+Problem: Data protection has been a problem especially to this date. Digital data is doubling every 18 months and online storage has been a big contributor to this problem. Accidental deletion, hardware faliures, device theft/loss has been avoided due to cloud storage.
+	Now the problem is the efficiency on both client and server side.
+	
+Goal: The goal of this thesis is to improve further "data deduplication" or the exploitation of redundant data which results to a smaller storage and bandwidth cuts.
+
+	The solution proposed here is the AA-Dedupe.
+	This was brought about due to 4 observations:
+		1) The majority of storage space is occupied by a small number of compressed files with low sub-file redundancy.
+		2) Static chunking (SC) [8] method can outperform content defined chunking (CDC) [15] in deduplication effectiveness for static application data and virtual machine images.
+		3) The computational overhead for deduplication is dominated by data capacity.
+		4) The amount of data shared among different types of applications is negligible.
+	
+	AA-Dedupe's main goal is to simply reduce the computational overhead and to adapt to scenarios where a different and more effective way of hashing can be used.
+	Bandwidth consumption is minimized because the redundant data is reduced. High effectiveness of deduplication was acheived because of source-chunk level deduplication (fine-grained data deduplication was expensive due to memory and processes which gave a bad result to its trade-off of size vs speed).
+	
+Design and Implementation of AA-Dedupe:
+	a) Architectural overview
+		Tiny files are first filtered for efficiency purposes and backup data streams are broken into chunks. Chunks from the same type of files will be checked in the hash values and if there is a match, the metadata will be updated and will be pointing to the source file, but if not, a new chunk will be stored in the cloud.
+	b) File size filter
+		Files that are very small (files no more than 10KB indicated) are filtered out and grouped into one container which increases data transfer efficiency over WAN.
+	c) Intelligent data chunking
+		File chunks are grouped into compressed files, static uncompressed files or dynamic uncompressed files which is useful to different scenarios.
+	d) Hash function selection in deduplicator
+		20B SHA-1 hash is used (over 16BMD5) to provide high data integrity with a trade-off of a slight increase in look-ups which is allowable enough.
+	e) Application-aware index structure
+	f) Container management
+		A container is a self-describing data structure which hastens up deduplication process.
+		AA-Dedupe will often group data from many smaller files and chunks into larger units called container before these data are transferred over WAN.
+
+With all these three combined together, we can search for a more efficient cloud storage with deduplication integrating the ideas of all these three thesis. There are more papers that can be included too. The first thesis can be the foundation or the idea that will mainly be focused on throughout the thesis and the 2nd will somehow be the architecture and the third will be an enhancement (although there are also enhancements found in all the 3 thesis presented). We can use the other thesis to fill up the gap of the other ideas for a better proposal.		
 
 Sources:
 	http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=5960097
