@@ -1,0 +1,44 @@
+PAPER 1 SUMMARY
+================
+
+TITLE
+Architectural Model for Wireless Peer-to-Peer (WP2P) File Sharing for Ubiquitous Mobile
+
+ABOUT
+The present scenario today dictates the increasing need and demand for file sharing applications ranging from small to large enterprise networks, both intra and internet. We are also now in the advent of mobile phones, and these phones are embedded in our day to day activities.
+
+This paper's mission is to combine the gap between the two and  to solve the problem of creating a peer-to-peer network on mobile phones while looking at the restrictions and limitations of these devices. The result is a proposed model architecture of a mobile P2P network.
+
+In the ambitious design to achieve the mobile P2P system, phones connect to phones to directly share files. But considering the limitations and constraints such as reliability, limited resources (battery life, insufficient processing power, storage capacity, screen size and input keyboard), and the specifications defined by service providers, this ambitious design would be difficult or impractical to build. To overcome this problem, the paper looked at an alternative way around these constraints.
+
+Hence, the paper created a peer-to-peer file sharing for network of mobile phones by designing a semi-centralized (or hybrid) type of architecture for the Peer-to-Peer network. The authors have created a Mobile P2P network. Each mobile phone is connected (via GPRS) to a local server that maintains a list of all files and their whereabouts in the entire network. When the "searcher" requests for a file, instead of directly asking each phone, it will communicate with the server. If that file is present in the database, the server replies with a list of phones nearby that has the file. The "searcher" phone will then use an SMS message to another phone, and then it is replied with an MMS message that contains the file itself.
+
+http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=5189580
+
+PAPER 2 SUMMARY
+===============
+
+TITLE
+Cellular STEM 
+Promoting interest in science, technology, engineering, and math education using cellular messaging, cloud 
+computing, and web-based social networks
+
+ABOUT
+
+STEM (Science, Technology, Engineering, and Mathematics) is a campaign program launched by the US Government to produce future scientists, technologists, engineers, and mathematicians and meet the demands of our current world. The useful applications that can fall under the STEM principles can be easily demonstated using computational/visualization tools. The authors noticed is that, usually, computational/visualization tools such as Matlab and Octave are introduced to the students only in College, and in fact these tools can be helpful for students to better understand their lessons in High School. To help this drive, using a combination of social network, computational/visualization engines, and the concept of cloud computing, they have produced the the paper produced the Cellular STEM: a classroom aid that can help students understand their STEM lessons well. 
+
+Students, via their email OR Twitter accounts, can submit a string of formula/request and then they are replied with its graphical representation as an image file. All of this can be done using their mobile phones using the SMS and MMS.
+
+In order to test this Cellular STEM system they have developed, they performed an experiment comparing 	the performance between the two approaches (email or twitter). They recorded the time it took for the student's message to make a complete journey. The messages were also made varied to completely cover the testing area. It is found out that the Twitter-based interface is preferable over the first system design which is the email-based interface covering the overall response time and reliability. 
+
+http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=6217514
+
+PAPER 3 SUMMARY
+===============
+
+TITLE
+Co-Designing an Intelligent Doctors-Colleagues-Patients Social Network
+
+ABOUT
+
+
