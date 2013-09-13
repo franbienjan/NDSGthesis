@@ -9,7 +9,7 @@
 int searchWord(char *fname, char *str) ;
 void compareFiles();
 void initFileList();
-
+off_t fsize(const char *filename);
 
 /*
  *	gg.txt - information of files
@@ -54,7 +54,7 @@ void compareFiles(){
 					strcat(t,ent->d_name);
 					if(searchWord("gg.txt",t)==0){
 						printf("\nfile '%s' is changed\n\n",ent->d_name);
-						fprintf(f2, "%s\n",ent->d_name);
+						fprintf(f2, "%s|%d\n",ent->d_name, fsize(ent->d_name));
 					}
 				} else printf("Cannot display the time.\n");
 
@@ -123,4 +123,13 @@ int searchWord(char *fname, char *str) {
 	if(f) fclose(f);
 	
    	return 0;
+}
+
+off_t fsize(const char *filename) {
+    struct stat st; 
+
+    if (stat(filename, &st) == 0)
+        return st.st_size;
+
+    return -1; 
 }
