@@ -1,44 +1,36 @@
 //IGNORE SMALL FILES
 
 #include <stdio.h>
-#include <dirent.h> 
-#include <sys/stat.h>
+#include <ctype.h>
+#include <string.h>
+
+void sizeFilter(FILE *f1) {
+
+	char line[300];
+	char *token;
+	char *splithash[30];
+	int i, j;
+	
+	while (fgets (line, sizeof(line), f1) != NULL) {
+		
+		i = 0;
+		splithash[i] = strtok(line, " ");
+		while (splithash[i] != NULL)
+			splithash[++i] = strtok( NULL, " " );
+		
+		for (j = 0; j < i; j++) {
+			printf("%d '%s'\n", j, splithash[j]);
+		}
+	}
+
+}
 
 main () {
 
-	DIR *dir;
-	FILE * pFile;
-	long lSize;
+	FILE *f1;
+	f1 = fopen ("test.txt", "r");
 	
-	struct dirent *ent;
-	struct stat b;
-	
-	if ((dir = opendir ("C:\\Users\\Viernes Family\\Desktop")) != NULL) {
-	
-	  while ((ent = readdir (dir)) != NULL){
-
-		if(strcmp(ent->d_name,"..")==1){
-			
-			pFile = fopen ( ent->d_name , "r" );
-	
-			if (pFile==NULL) {
-				//printf("File error %s\n", ent->d_name);
-				continue;
-				//fputs ("File error",stderr); exit (1);
-			}
-			
-			//obtain file size
-			fseek (pFile , 0 , SEEK_END);
-			lSize = ftell (pFile);
-			rewind (pFile);
-			
-			if (lSize >= 8000)
-				printf("%s: %d bytes\n", ent->d_name, lSize);
-			
-		}
-	  }
-
-	  closedir (dir);
-	} else perror ("");
+	//Function to read file with hash functions and ignore small files
+	sizeFilter(f1);
 	
 }
