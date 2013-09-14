@@ -3,13 +3,26 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
+#include <stdlib.h>
+#include "bloom.h"
 
-void sizeFilter(FILE *f1) {
+struct bloom bloom;
+
+void masterServer(FILE *f1) {
 
 	char line[300];
-	char *token;
+	char *token, **ptr;
 	char *splithash[30];
-	int i, j;
+	int i, j, a;
+	long num;
+	long entries = 0;
+	
+	while (fgets (line, sizeof(line), f1) != NULL) {
+		entries++;
+	}
+	
+	bloom_init(&bloom, entries, 0.01);
+	rewind(f1);
 	
 	while (fgets (line, sizeof(line), f1) != NULL) {
 		
@@ -18,10 +31,21 @@ void sizeFilter(FILE *f1) {
 		while (splithash[i] != NULL)
 			splithash[++i] = strtok( NULL, " " );
 		
-		for (j = 0; j < i; j++) {
-			printf("%d '%s'\n", j, splithash[j]);
-		}
+		//Size Filter
+		num = atoi(splithash[2]);
+		if (num < 8000) {
+			printf("FAIL! %ld\n", num);
+			continue;
+		} 
+		
+		//Bloom Filter
+		bloom_add(&bloom, splithash[0], strlen(splithash[0]));
+
 	}
+	
+	if (bloom_check(&bloom, "him", 3)) {
+		printf("It may be there!\n");
+	}	
 
 }
 
@@ -31,6 +55,6 @@ main () {
 	f1 = fopen ("test.txt", "r");
 	
 	//Function to read file with hash functions and ignore small files
-	sizeFilter(f1);
+	masterServer(f1);
 	
 }
