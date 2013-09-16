@@ -44,7 +44,8 @@ void compareFiles(){
 	f=fopen("gg.txt","r");
 	f2=fopen("out.txt","w+");
 	
-	if ((dir = opendir ("C:\\Users\\Raf\\Desktop\\NDSGthesis\\Code\\Raf")) != NULL) {
+	//if ((dir = opendir ("C:\\Users\\Raf\\Desktop\\NDSGthesis\\Code\\Raf")) != NULL) {
+	if ((dir = opendir (".")) != NULL) {
 		while ((ent = readdir (dir)) != NULL){
 		
 			// excludes unnecessary scans
@@ -94,12 +95,12 @@ void initFileList(){
 	FILE *f;
 	f=fopen("gg.txt","w+");
 	
-	if ((dir = opendir ("C:\\Users\\Raf\\Desktop\\NDSGthesis\\Code\\Raf")) != NULL) {
+	//if ((dir = opendir ("C:\\Users\\Raf\\Desktop\\NDSGthesis\\Code\\Raf")) != NULL) {
+	if ((dir = opendir (".")) != NULL) {
+		printf("Initialized files:\n");
 		while ((ent = readdir (dir)) != NULL){
-	  
 			// excludes unnecessary scans
 			if(strcmp(ent->d_name,".")!=0 && strcmp(ent->d_name,"..")!=0 && strcmp(ent->d_name,"a.c")!=0 && strcmp(ent->d_name,"a.exe")!=0 && strcmp(ent->d_name,"gg.txt")!=0 && strcmp(ent->d_name,"out.txt")!=0){
-				
 				// prints file info
 				if (!stat(ent->d_name, &b)){
 					// get file name
@@ -124,7 +125,6 @@ void initFileList(){
 					strftime(t, 100, "%m%d%Y-%H:%M:%S", localtime(&b.st_atime));
 					fprintf(f, "%s\n",t);
 					printf("%s\n",t);
-					
 				} else printf("Cannot display the time.\n");
 				
 			} //endif
