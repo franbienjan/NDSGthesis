@@ -9,7 +9,7 @@
 int searchWord(char *fname, char *str) ;
 void compareFiles();
 void initFileList();
-off_t fsize(const char *filename);
+off_t getSize(const char *filename);
 
 /*
  *	gg.txt - information of files
@@ -46,16 +46,33 @@ void compareFiles(){
 	
 	if ((dir = opendir ("C:\\Users\\Raf\\Desktop\\NDSGthesis\\Code\\Raf")) != NULL) {
 		while ((ent = readdir (dir)) != NULL){
+		
+			// excludes unnecessary scans
 			if(strcmp(ent->d_name,".")!=0 && strcmp(ent->d_name,"..")!=0 && strcmp(ent->d_name,"a.c")!=0 && strcmp(ent->d_name,"a.exe")!=0 && strcmp(ent->d_name,"gg.txt")!=0 && strcmp(ent->d_name,"out.txt")!=0){
 
 				// prints date of modification
 				if (!stat(ent->d_name, &b)){
-					strftime(t, 100, "%d/%m/%Y %H:%M:%S|||", localtime(&b.st_mtime));
-					strcat(t,ent->d_name);
-					if(searchWord("gg.txt",t)==0){
-						printf("\nfile '%s' is changed\n\n",ent->d_name);
-						fprintf(f2, "%s|%d\n",ent->d_name, fsize(ent->d_name));
+					
+					if(searchWord("gg.txt",ent->d_name)!=0){
+					
+						char buffer[50];
+						strcpy(t,ent->d_name);
+						strcat(t,"|");
+						strcat(t,itoa(getSize(ent->d_name),buffer,10));
+						strcat(t,"|");
+						strftime(buffer, 100, "%m%d%Y-%H:%M:%S|", localtime(&b.st_ctime));
+						strcat(t,buffer);
+						strftime(buffer, 100, "%m%d%Y-%H:%M:%S|", localtime(&b.st_mtime));
+						strcat(t,buffer);
+						strftime(buffer, 100, "%m%d%Y-%H:%M:%S", localtime(&b.st_atime));
+						strcat(t,buffer);
+						
+						if(searchWord("gg.txt",t)==0){
+							printf("\nfilename:%s\nfile '%s' is changed\n\n",t,ent->d_name);
+							fprintf(f2, "%s\n",t);
+						}
 					}
+					
 				} else printf("Cannot display the time.\n");
 
 			} //endif
@@ -78,14 +95,39 @@ void initFileList(){
 	f=fopen("gg.txt","w+");
 	
 	if ((dir = opendir ("C:\\Users\\Raf\\Desktop\\NDSGthesis\\Code\\Raf")) != NULL) {
-	  while ((ent = readdir (dir)) != NULL){
-		if(strcmp(ent->d_name,".")!=0 && strcmp(ent->d_name,"..")!=0 && strcmp(ent->d_name,"a.c")!=0 && strcmp(ent->d_name,"a.exe")!=0 && strcmp(ent->d_name,"gg.txt")!=0 && strcmp(ent->d_name,"out.txt")!=0){
-			// prints date of modification
-			if (!stat(ent->d_name, &b)){
-				strftime(t, 100, "%d/%m/%Y %H:%M:%S", localtime(&b.st_mtime));
-				fprintf(f, "%s|||%s\n",t,ent->d_name);
-			} else printf("Cannot display the time.\n");
-		} //endif
+		while ((ent = readdir (dir)) != NULL){
+	  
+			// excludes unnecessary scans
+			if(strcmp(ent->d_name,".")!=0 && strcmp(ent->d_name,"..")!=0 && strcmp(ent->d_name,"a.c")!=0 && strcmp(ent->d_name,"a.exe")!=0 && strcmp(ent->d_name,"gg.txt")!=0 && strcmp(ent->d_name,"out.txt")!=0){
+				
+				// prints file info
+				if (!stat(ent->d_name, &b)){
+					// get file name
+					fprintf(f, "%s|",ent->d_name);
+					printf("%s|",ent->d_name);
+					
+					// get file size
+					fprintf(f, "%d|",getSize(ent->d_name));
+					printf("%d|",getSize(ent->d_name));
+				
+					//get date created
+					strftime(t, 100, "%m%d%Y-%H:%M:%S", localtime(&b.st_ctime));
+					fprintf(f, "%s|",t);
+					printf("%s|",t);
+					
+					//get date modified
+					strftime(t, 100, "%m%d%Y-%H:%M:%S", localtime(&b.st_mtime));
+					fprintf(f, "%s|",t);
+					printf("%s|",t);
+					
+					//get date accessed
+					strftime(t, 100, "%m%d%Y-%H:%M:%S", localtime(&b.st_atime));
+					fprintf(f, "%s\n",t);
+					printf("%s\n",t);
+					
+				} else printf("Cannot display the time.\n");
+				
+			} //endif
 	  } //endwhile
 	  closedir (dir);
 	}else perror ("");
@@ -125,7 +167,7 @@ int searchWord(char *fname, char *str) {
    	return 0;
 }
 
-off_t fsize(const char *filename) {
+off_t getSize(const char *filename) {
     struct stat st; 
 
     if (stat(filename, &st) == 0)
