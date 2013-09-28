@@ -70,7 +70,7 @@ void initFileList(){
 			if(isDir(ent->d_name)==1) ;
 			
 			// excludes unnecessary scans
-			else if(strcmp(ent->d_name,".")!=0 && strcmp(ent->d_name,"..")!=0 && strcmp(ent->d_name,"a.c")!=0 && strcmp(ent->d_name,"a.exe")!=0 && strcmp(ent->d_name,"gg.txt")!=0 && strcmp(ent->d_name,"out.txt")!=0 && strcmp(ent->d_name,"sha1.c")!=0 && strcmp(ent->d_name,"sha1.h")!=0){
+			else if(strcmp(ent->d_name,".")!=0 && strcmp(ent->d_name,"..")!=0 && strcmp(ent->d_name,"a.c")!=0 && strcmp(ent->d_name,"a.out")!=0 && strcmp(ent->d_name,"gg.txt")!=0 && strcmp(ent->d_name,"out.txt")!=0 && strcmp(ent->d_name,"sha1.c")!=0 && strcmp(ent->d_name,"sha1.h")!=0){
 				
 				if (!stat(ent->d_name, &b)){
 					// get file name
@@ -78,8 +78,8 @@ void initFileList(){
 					printf("%s|",getSha(ent->d_name,getSize(ent->d_name)));
 					
 					// get file size
-					fprintf(f, "%d|",getSize(ent->d_name));
-					printf("%d|",getSize(ent->d_name));
+					fprintf(f, "%lu|",getSize(ent->d_name));
+					printf("%lu|",getSize(ent->d_name));
 				
 					//get date created
 					strftime(t, 100, "%m%d%Y-%H:%M:%S", localtime(&b.st_ctime));
@@ -124,17 +124,21 @@ void compareFiles(){
 	if ((dir = opendir (".")) != NULL) {
 		while ((ent = readdir (dir)) != NULL){
 			// excludes unnecessary scans
-			if(strcmp(ent->d_name,".")!=0 && strcmp(ent->d_name,"..")!=0 && strcmp(ent->d_name,"a.c")!=0 && strcmp(ent->d_name,"a.exe")!=0 && strcmp(ent->d_name,"gg.txt")!=0 && strcmp(ent->d_name,"out.txt")!=0  && strcmp(ent->d_name,"sha1.c")!=0 && strcmp(ent->d_name,"sha1.h")!=0){
-				
+			if(strcmp(ent->d_name,".")!=0 && strcmp(ent->d_name,"..")!=0 && strcmp(ent->d_name,"a.c")!=0 && strcmp(ent->d_name,"a.out")!=0 && strcmp(ent->d_name,"gg.txt")!=0 && strcmp(ent->d_name,"out.txt")!=0  && strcmp(ent->d_name,"sha1.c")!=0 && strcmp(ent->d_name,"sha1.h")!=0){
+
 				// prints date of modification
 				if (!stat(ent->d_name, &b)){
 					
 					if(searchWord("gg.txt",ent->d_name)!=0){
-					
+						printf("1");
 						char buffer[256];
 						strcpy(t, getSha(ent->d_name,getSize(ent->d_name)));
 						strcat(t,"|");
-						strcat(t,itoa(getSize(ent->d_name),buffer,10));
+						sprintf(buffer, "%lu", getSize(ent->d_name));
+//						strcat(t,itoa(getSize(ent->d_name),buffer,10));
+//						strcpy(buffer,getSize(ent->d_name));
+
+						strcat(t,buffer);
 						strcat(t,"|");
 						strftime(buffer, 100, "%m%d%Y-%H:%M:%S|", localtime(&b.st_ctime));
 						strcat(t,buffer);
@@ -196,8 +200,7 @@ int searchWord(char *fname, char *str) {
 off_t getSize(const char *filename) {
     struct stat st; 
 
-    if (stat(filename, &st) == 0)
-        return st.st_size;
+    if (stat(filename, &st) == 0) return st.st_size;
 
     return -1; 
 }
