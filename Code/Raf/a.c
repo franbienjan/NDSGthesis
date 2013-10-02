@@ -11,11 +11,14 @@
 // searches the string 'str' in file 'fname'
 int searchWord(char *fname, char *str) ;
 
+// gets the line in 'gg.txt' with the 'str' string
+char* getLine(char *str,FILE *f);
+
 // prints out the changed files and puts in out.txt
-void compareFiles();
+void compareFiles(const char *name, int level,FILE *f);
 
 // initializes the file list in gg.txt
-void initFileList();
+void initFileList(const char *name, int level,FILE *f);
 
 // returns the size of the file in bytes
 off_t getSize(const char *filename);
@@ -27,7 +30,7 @@ int isDir(const char* target);
 void test(int err, const char* msg);
 
 // gets "sha-1"
-char* getSha(char* fileName, int fileSize);
+char* getSha(char* fileDirectory, char* fileName);
 
 /*
  *	gg.txt - information of files
@@ -40,130 +43,176 @@ typedef struct FolderList{
 	DIR *dir;
 }FolderList;
 
+FILE *file1;
+FILE *file2;
+
+void callInit(){
+	file1=fopen("gg.txt","w+");
+	initFileList(".",0,file1);
+	fclose(file1);
+}
+
+
 void main() {
 	int i;
-	FILE *fp;
+
 	do{
 		printf("1 to initialize txt file\n2 to compare\n3 to exit\n:");
 		scanf("%d",&i);
-		if(i==1) initFileList();
-		else if(i==2) compareFiles();	
-		else if(i==3){
+		if(i==1){
+			file1=fopen("gg.txt","w+");
+			initFileList(".",0,file1);
+			fclose(file1);
+		}else if(i==2){
+			file1=fopen("gg.txt","r");
+			file2=fopen("out.txt","w+");
+			compareFiles(".",0,file1);
+			fclose(file1);
+			fclose(file2);
+			callInit();
+		}else if(i==3){
 			break;
 		}
 	}while(1);
 }
 
-void initFileList(){
-	DIR *dir;
-	char t[ 100 ] = "";
-	struct dirent *ent;
+
+void initFileList(const char *name, int level,FILE *f){
+    DIR *dir;
+    struct dirent *ent;
+	char path[1024]="";
+	char t[ 512 ] = "";
+	int len;
+
 	struct stat b;
-	FILE *f;
-	f=fopen("gg.txt","w+");
-	
-	//if ((dir = opendir ("C:\\Users\\Raf\\Desktop\\NDSGthesis\\Code\\Raf")) != NULL) {
-	if ((dir = opendir (".")) != NULL) {
-		printf("Initialized files:\n");
-		while ((ent = readdir (dir)) != NULL){
-			// if the file is a folder
-			if(isDir(ent->d_name)==1) ;
-			
-			// excludes unnecessary scans
-			else if(strcmp(ent->d_name,".")!=0 && strcmp(ent->d_name,"..")!=0 && strcmp(ent->d_name,"a.c")!=0 && strcmp(ent->d_name,"a.out")!=0 && strcmp(ent->d_name,"gg.txt")!=0 && strcmp(ent->d_name,"out.txt")!=0 && strcmp(ent->d_name,"sha1.c")!=0 && strcmp(ent->d_name,"sha1.h")!=0){
-				
-				if (!stat(ent->d_name, &b)){
-					// get file name
-					fprintf(f, "%s|", getSha(ent->d_name,getSize(ent->d_name)));
-					printf("%s|",getSha(ent->d_name,getSize(ent->d_name)));
-					
-					// get file size
-					fprintf(f, "%lu|",getSize(ent->d_name));
-					printf("%lu|",getSize(ent->d_name));
-				
-					//get date created
-					strftime(t, 100, "%m%d%Y-%H:%M:%S", localtime(&b.st_ctime));
-					fprintf(f, "%s|",t);
-					printf("%s|",t);
-					
-					//get date modified
-					strftime(t, 100, "%m%d%Y-%H:%M:%S", localtime(&b.st_mtime));
-					fprintf(f, "%s|",t);
-					printf("%s|",t);
-					
-					//get date accessed
-					strftime(t, 100, "%m%d%Y-%H:%M:%S", localtime(&b.st_atime));
-					fprintf(f, "%s|",t);
-					printf("%s|",t);
-					
-					fprintf(f, "%s\n",ent->d_name);
-					printf("%s\n",ent->d_name);
-				} else{
-					printf("%s Cannot display the time.\n",ent->d_name);
-				}
-				
-			} //endif
-	  } //endwhile
-	  closedir (dir);
-	}else perror ("");
-	fclose(f);
+
+    if (!(dir = opendir(name))) return;
+    if (!(ent = readdir(dir))) return;
+    int i=0;
+    do{
+    	// if folder
+        if (ent->d_type == DT_DIR){
+
+			if(strcmp(ent->d_name,"..")==0) len = snprintf(path, sizeof(path)-1, "%s", name);
+			else len = snprintf(path, sizeof(path)-1, "%s/%s", name, ent->d_name);
+            path[len] = 0;
+
+            if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) continue;
+            initFileList(path, level + 1,f);
+        }
+        //if file
+        else{
+        	len = snprintf(path, sizeof(path)-1, "%s", name);
+        	if(strcmp(ent->d_name,"a.c")!=0 && strcmp(ent->d_name,"a.out")!=0 && strcmp(ent->d_name,"sha1.c")!=0 && strcmp(ent->d_name,"sha1.h")!=0 && strcmp(ent->d_name,"out.txt")!=0 && strcmp(ent->d_name,"gg.txt")!=0) {
+        		
+        		char file[strlen(path)+strlen(ent->d_name)+1];
+        		strcpy(file,path);
+        		strcat(file,"/");
+        		strcat(file,ent->d_name);
+
+				stat(file, &b);
+        		printf("%s|",getSha(path,ent->d_name));
+        		fprintf(f, "%s|", getSha(path,ent->d_name));
+
+        		printf("%lu|",getSize(file));
+        		fprintf(f, "%lu|", getSize(file));
+
+        		strftime(t, 100, "%m%d%Y-%H:%M:%S", localtime(&b.st_ctime));
+        		printf("%s|",t);
+        		fprintf(f, "%s|",t);
+
+        		strftime(t, 100, "%m%d%Y-%H:%M:%S", localtime(&b.st_mtime));
+        		printf("%s|",t);
+				fprintf(f, "%s|",t);
+
+				strftime(t, 100, "%m%d%Y-%H:%M:%S|", localtime(&b.st_atime));
+				printf("%s",t);
+				fprintf(f, "%s",t);
+
+				printf("%s\n",file);
+				strcpy(file,path);
+        		strcat(file,"/\"");
+        		strcat(file,ent->d_name);
+        		strcat(file,"\"");
+				fprintf(f, "%s\n",file);
+
+        	}	
+        }
+
+    } while (ent = readdir(dir));
+    
+    closedir(dir);
 }
 
-void compareFiles(){
-	printf("\ncomparing..\n");
-	DIR *dir;
-	char t[ 100 ] = "";
-	struct dirent *ent;
+
+void compareFiles(const char *name, int level,FILE *f){
+    DIR *dir;
+    struct dirent *ent;
+	char path[1024]="";
+	char t[ 512 ] = "";
+	int len;
+
 	struct stat b;
-	FILE 	*f,
-			*f2;
-	f=fopen("gg.txt","r");
-	f2=fopen("out.txt","w+");
-	
-	//if ((dir = opendir ("C:\\Users\\Raf\\Desktop\\NDSGthesis\\Code\\Raf")) != NULL) {
-	if ((dir = opendir (".")) != NULL) {
-		while ((ent = readdir (dir)) != NULL){
-			// excludes unnecessary scans
-			if(strcmp(ent->d_name,".")!=0 && strcmp(ent->d_name,"..")!=0 && strcmp(ent->d_name,"a.c")!=0 && strcmp(ent->d_name,"a.out")!=0 && strcmp(ent->d_name,"gg.txt")!=0 && strcmp(ent->d_name,"out.txt")!=0  && strcmp(ent->d_name,"sha1.c")!=0 && strcmp(ent->d_name,"sha1.h")!=0){
 
-				// prints date of modification
-				if (!stat(ent->d_name, &b)){
+
+    if (!(dir = opendir(name))) return;
+    if (!(ent = readdir(dir))) return;
+    int i=0;
+    do{
+    	// if folder
+        if (ent->d_type == DT_DIR){
+			if(strcmp(ent->d_name,"..")==0) len = snprintf(path, sizeof(path)-1, "%s", name);
+			else len = snprintf(path, sizeof(path)-1, "%s/%s", name, ent->d_name);
+            path[len] = 0;
+
+            if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) continue;
+            compareFiles(path, level + 1,f);
+        }
+        //if file
+        else{
+        	len = snprintf(path, sizeof(path)-1, "%s", name);
+        	if(strcmp(ent->d_name,"a.c")!=0 && strcmp(ent->d_name,"a.out")!=0 && strcmp(ent->d_name,"sha1.c")!=0 && strcmp(ent->d_name,"sha1.h")!=0 && strcmp(ent->d_name,"out.txt")!=0 && strcmp(ent->d_name,"gg.txt")!=0) {
+        			strcpy(t,getLine(ent->d_name,f));
+        			if(t!=NULL){
+        				if(strcmp(t,getSha(path,ent->d_name))!=0){
+
+        					strcpy(t, getSha(path,ent->d_name));
+        					char file[strlen(path)+strlen(ent->d_name)+1];
+        					strcpy(file,path);
+        					strcat(file,"/");
+		        			strcat(file,ent->d_name);
 					
-					if(searchWord("gg.txt",ent->d_name)!=0){
-						printf("1");
-						char buffer[256];
-						strcpy(t, getSha(ent->d_name,getSize(ent->d_name)));
-						strcat(t,"|");
-						sprintf(buffer, "%lu", getSize(ent->d_name));
-//						strcat(t,itoa(getSize(ent->d_name),buffer,10));
-//						strcpy(buffer,getSize(ent->d_name));
+							char buffer[256];
 
-						strcat(t,buffer);
-						strcat(t,"|");
-						strftime(buffer, 100, "%m%d%Y-%H:%M:%S|", localtime(&b.st_ctime));
-						strcat(t,buffer);
-						strftime(buffer, 100, "%m%d%Y-%H:%M:%S|", localtime(&b.st_mtime));
-						strcat(t,buffer);
-						strftime(buffer, 100, "%m%d%Y-%H:%M:%S", localtime(&b.st_atime));
-						strcat(t,buffer);
-						printf("searching for\n%s\n",t);
-						if(searchWord("gg.txt",t)==0){
+							strcpy(t, getSha(path,ent->d_name));
+							strcat(t,"|");
+							sprintf(buffer, "%lu", getSize(ent->d_name));
+
+							stat(file, &b);
+							strcat(t,buffer);
+							strcat(t,"|");
+
+							strftime(buffer, 100, "%m%d%Y-%H:%M:%S|", localtime(&b.st_ctime));
+							strcat(t,buffer);
+
+							strftime(buffer, 100, "%m%d%Y-%H:%M:%S|", localtime(&b.st_mtime));
+							strcat(t,buffer);
+
+							strftime(buffer, 100, "%m%d%Y-%H:%M:%S", localtime(&b.st_atime));
+							strcat(t,buffer);
+
+							fprintf(file2, "%s\n",t);
 							
-							printf("\nfilename:%s\nfile '%s' is changed\n\n",t,ent->d_name);
-							fprintf(f2, "%s\n",t);
-						}
-					}
-					
-				} else printf("Cannot display the time.\n");
+        				}
+        			}
 
-			} //endif
-		} //endwhile
+				
+        	}	
+        }
 
-	  closedir (dir);
-	}else perror ("");
-	fclose(f);
-	fclose(f2);
-	initFileList();
+    } while (ent = readdir(dir));
+    
+    closedir(dir);
 }
 
 int searchWord(char *fname, char *str) {
@@ -176,25 +225,31 @@ int searchWord(char *fname, char *str) {
 
 	while(fgets(temp, 512, f) != NULL) {
 		if((strstr(temp, str)) != NULL) {
-			//printf("A match found on line: %d\n", line_num);
-			//printf("\n%s\n", temp);
 			find_result++;
-			//printf("1\n");
 			return 1;
 		}
 		line_num++;
 	}
 
-	if(find_result == 0) {
-		//printf("Sorry, couldn't find a match.\n");
-		//printf("0\n");
-		return 0;
-	}
+	if(find_result == 0) return 0;
 	
 	//Close the file if still open.
 	if(f) fclose(f);
 	
    	return 0;
+}
+
+char* getLine(char *str,FILE *f) {
+	char *temp=malloc(512);
+	char fname[strlen(str)+2];
+	strcpy(fname,"\"");
+	strcat(fname,str);
+	strcat(fname,"\"");
+
+	while(fgets(temp, 512, f) != NULL){
+		if(strstr(temp,fname)!=NULL) return strtok(temp, "|");
+	}
+	return NULL;
 }
 
 off_t getSize(const char *filename) {
@@ -218,34 +273,47 @@ void test(int err, const char* msg) {
     }
 }
 
-char* getSha(char* fileName, int fileSize){
-	char split[20];
-	char* eureka=malloc(50);
-    int n, i, len;
-    static unsigned char buf[20] = {0};
-	
-	char string[fileSize];
-	FILE *fp;
-	fp=fopen(fileName,"rb");
-	if(!fp){
-		printf("\nNo file found");
-		return;
-	}
-	fread(string,1,fileSize,fp);
+char* getSha(char* fileDirectory, char* fileName){
 
-	SHA1Context sha;
+    char	buffer[20];
+    char	*eureka=malloc(100);
+    char	file[strlen(fileDirectory)+strlen(fileName)+1];
+    int 	n,
+    		i;
 
+    static	unsigned char buf[20] = {0};
+    SHA1Context sha;
+    FILE 	*f;
     memset(eureka, 0, sizeof eureka);
 
-    // Print a hash of the key
-    len = strlen(string);  // key length
+    strcpy(file,fileDirectory);
+    strcat(file,"/");
+    strcat(file,fileName);
+    f=fopen(file,"rb");
+    int size=getSize(file);
+
+	char string[size];
+
+	if(!f) return;
+
+	fseek(f, SEEK_SET, 0);
+
+
+	if(size==0) strcpy(string,"");
+	else while(fgets(buffer,20,f)!=NULL) strcat(string,buffer);
+
+	
     test(SHA1Reset(&sha), "SHA1Reset");
-    test(SHA1Input(&sha, string, len), "SHA1Input");
+    test(SHA1Input(&sha, string, size), "SHA1Input");
     test(SHA1Result(&sha, buf), "SHA1Result");
-    //printf("Key hash = ");
+
+    int int_hash = 0;
     for (i=0; i<20; ++i){
-        sprintf(split, "%02X", buf[i]);
-        strcat(eureka,split);
+        sprintf(buffer, "%02X", buf[i]);
+        int_hash += buf[i];
+        strcat(eureka,buffer);
     }
-	return eureka;	
+
+	return eureka;
+
 }
