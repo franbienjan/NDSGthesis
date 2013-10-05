@@ -62,6 +62,7 @@ void masterServer(FILE *f1, FILE *f2) {
 		bloom_add(&bloom, splithash[1], strlen(splithash[1]));
 	}
 	
+	
 	//read list of updated files
 	while (fgets (line, sizeof(line), f1) != NULL) {
 		
@@ -81,10 +82,7 @@ void masterServer(FILE *f1, FILE *f2) {
 		//Bloom Filter		
 		if (bloom_add(&bloom, splithash[1], strlen(splithash[1])) == 0) {
 			fprintf(f2, "%s", fullline);
-		} else {
-			printf("hello %s", fullline);
 		}
-	
 	}
 	
 }
