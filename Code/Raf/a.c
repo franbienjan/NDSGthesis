@@ -5,7 +5,7 @@
 //#include <sys/types.h>
 //#include <unistd.h>
 #include <sys/stat.h>
-#include<dirent.h> // for dir algo
+#include <dirent.h>
 #include "sha1.h"
 
 // searches the string 'str' in file 'fname'
@@ -23,18 +23,17 @@ void initFileList(const char *name, int level,FILE *f);
 // returns the size of the file in bytes
 off_t getSize(const char *filename);
 
-// determines if the file in string 'target' is a folder
-int isDir(const char* target);
-
 // test function for getSha()
 void test(int err, const char* msg);
 
 // gets "sha-1"
 char* getSha(char* fileDirectory, char* fileName);
 
+// initializes gg.txt
+void callInit();
 /*
  *	gg.txt - information of files
- *  out.txt - list of files to be duplicated
+ *  out.txt - list of files to be deduplicated
  *
  */
  
@@ -45,25 +44,6 @@ typedef struct FolderList{
 
 FILE *file1;
 FILE *file2;
-
-void callInit(){
-/*
-file1=fopen("gg.txt","r");
-char line[150];
-char *buf;
-while(fgets(line,150,file1)!=NULL){
-    buf = strtok (line,"\"");
-    buf = strtok (NULL,"\"");
-    printf("\n%s",buf);
-}
-
-fclose(file1);
-*/
-	file1=fopen("gg.txt","w+");
-	initFileList("./Galu",0,file1);
-	fclose(file1);
-}
-
 
 void main() {
 	int i;
@@ -193,19 +173,13 @@ void compareFiles(const char *name, int level,FILE *f){
         			if(t!=NULL){
         				if(strcmp(t,getSha(path,ent->d_name))!=0){
         					char file[strlen(path)+strlen(ent->d_name)+1];
-                            
-
-
-                            //char *buf;
-                            //buf = strtok (str,"\"");
-                            //buf = strtok (NULL,"\"");
 
         					// file path
         					strcpy(file,path);
         					strcat(file,"/");
-                            strcat(file,"\"");
+                            //strcat(file,"\"");
 		        			strcat(file,ent->d_name);
-                            strcat(file,"\"");
+                            //strcat(file,"\"");
 		        			strcpy(t, file);
 
 		        			strcat(t,"|");
@@ -217,6 +191,7 @@ void compareFiles(const char *name, int level,FILE *f){
 
         					// file size
         					char buffer[18];
+                            printf("\n%s is changed\n",file);
         					sprintf(buffer, "%lu", getSize(file));
         					strcat(t,buffer);
 							strcat(t,"|");
@@ -272,6 +247,7 @@ int searchWord(char *fname, char *str) {
 char* getLine(char *str,FILE *f) {
 	char *temp=malloc(512);
 	char fname[strlen(str)+2];
+    char *buf;
 	strcpy(fname,"\"");
 	strcat(fname,str);
 	strcat(fname,"\"");
@@ -288,12 +264,6 @@ off_t getSize(const char *filename) {
     if (stat(filename, &st) == 0) return st.st_size;
 
     return -1; 
-}
-
-int isDir(const char* target){
-   struct stat statbuf;
-   stat(target, &statbuf);
-   return S_ISDIR(statbuf.st_mode);
 }
 
 void test(int err, const char* msg) {
@@ -346,4 +316,22 @@ char* getSha(char* fileDirectory, char* fileName){
 
 	return eureka;
 
+}
+
+void callInit(){
+/*
+file1=fopen("gg.txt","r");
+char line[150];
+char *buf;
+while(fgets(line,150,file1)!=NULL){
+    buf = strtok (line,"\"");
+    buf = strtok (NULL,"\"");
+    printf("\n%s",buf);
+}
+
+fclose(file1);
+*/
+    file1=fopen("gg.txt","w+");
+    initFileList("./Galu",0,file1);
+    fclose(file1);
 }
