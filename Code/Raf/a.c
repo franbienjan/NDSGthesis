@@ -47,8 +47,20 @@ FILE *file1;
 FILE *file2;
 
 void callInit(){
+/*
+file1=fopen("gg.txt","r");
+char line[150];
+char *buf;
+while(fgets(line,150,file1)!=NULL){
+    buf = strtok (line,"\"");
+    buf = strtok (NULL,"\"");
+    printf("\n%s",buf);
+}
+
+fclose(file1);
+*/
 	file1=fopen("gg.txt","w+");
-	initFileList(".",0,file1);
+	initFileList("./Galu",0,file1);
 	fclose(file1);
 }
 
@@ -61,12 +73,12 @@ void main() {
 		scanf("%d",&i);
 		if(i==1){
 			file1=fopen("gg.txt","w+");
-			initFileList(".",0,file1);
+			initFileList("./Galu",0,file1);
 			fclose(file1);
 		}else if(i==2){
 			file1=fopen("gg.txt","r");
 			file2=fopen("out.txt","w+");
-			compareFiles(".",0,file1);
+			compareFiles("./Galu",0,file1);
 			fclose(file1);
 			fclose(file2);
 			callInit();
@@ -111,25 +123,25 @@ void initFileList(const char *name, int level,FILE *f){
         		strcat(file,ent->d_name);
 
 				stat(file, &b);
-        		printf("%s|",getSha(path,ent->d_name));
+        		//printf("%s|",getSha(path,ent->d_name));
         		fprintf(f, "%s|", getSha(path,ent->d_name));
 
-        		printf("%lu|",getSize(file));
+        		//printf("%lu|",getSize(file));
         		fprintf(f, "%lu|", getSize(file));
 
         		strftime(t, 100, "%m%d%Y-%H:%M:%S", localtime(&b.st_ctime));
-        		printf("%s|",t);
+        		//printf("%s|",t);
         		fprintf(f, "%s|",t);
 
         		strftime(t, 100, "%m%d%Y-%H:%M:%S", localtime(&b.st_mtime));
-        		printf("%s|",t);
+        		//printf("%s|",t);
 				fprintf(f, "%s|",t);
 
 				strftime(t, 100, "%m%d%Y-%H:%M:%S|", localtime(&b.st_atime));
-				printf("%s",t);
+				//printf("%s",t);
 				fprintf(f, "%s",t);
 
-				printf("%s\n",file);
+				//printf("%s\n",file);
 				strcpy(file,path);
         		strcat(file,"/\"");
         		strcat(file,ent->d_name);
@@ -158,6 +170,7 @@ void compareFiles(const char *name, int level,FILE *f){
     if (!(dir = opendir(name))) return;
     if (!(ent = readdir(dir))) return;
     int i=0;
+
     do{
     	// if folder
         if (ent->d_type == DT_DIR){
@@ -173,26 +186,44 @@ void compareFiles(const char *name, int level,FILE *f){
         	len = snprintf(path, sizeof(path)-1, "%s", name);
         	if(strcmp(ent->d_name,"a.c")!=0 && strcmp(ent->d_name,"a.out")!=0 && strcmp(ent->d_name,"sha1.c")!=0 && strcmp(ent->d_name,"sha1.h")!=0 && strcmp(ent->d_name,"out.txt")!=0 && strcmp(ent->d_name,"gg.txt")!=0) {
         			strcpy(t,getLine(ent->d_name,f));
+
+        			// aaaaaa.txt bug
+        			// if "a" is in file
+
         			if(t!=NULL){
         				if(strcmp(t,getSha(path,ent->d_name))!=0){
-
-        					strcpy(t, getSha(path,ent->d_name));
         					char file[strlen(path)+strlen(ent->d_name)+1];
+                            
+
+
+                            //char *buf;
+                            //buf = strtok (str,"\"");
+                            //buf = strtok (NULL,"\"");
+
+        					// file path
         					strcpy(file,path);
         					strcat(file,"/");
+                            strcat(file,"\"");
 		        			strcat(file,ent->d_name);
-					
-							char buffer[256];
+                            strcat(file,"\"");
+		        			strcpy(t, file);
 
-							strcpy(t, getSha(path,ent->d_name));
+		        			strcat(t,"|");
+
+		        			// file hash
+        					strcat(t, getSha(path,ent->d_name));
+
+        					strcat(t,"|");
+
+        					// file size
+        					char buffer[18];
+        					sprintf(buffer, "%lu", getSize(file));
+        					strcat(t,buffer);
 							strcat(t,"|");
-							sprintf(buffer, "%lu", getSize(ent->d_name));
 
-							stat(file, &b);
-							strcat(t,buffer);
-							strcat(t,"|");
-
+                            stat(file, &b);
 							strftime(buffer, 100, "%m%d%Y-%H:%M:%S|", localtime(&b.st_ctime));
+                            //printf("\n%s\n",buffer);
 							strcat(t,buffer);
 
 							strftime(buffer, 100, "%m%d%Y-%H:%M:%S|", localtime(&b.st_mtime));
@@ -201,8 +232,7 @@ void compareFiles(const char *name, int level,FILE *f){
 							strftime(buffer, 100, "%m%d%Y-%H:%M:%S", localtime(&b.st_atime));
 							strcat(t,buffer);
 
-							fprintf(file2, "%s\n",t);
-							
+        					fprintf(file2, "%s\n",t);
         				}
         			}
 
