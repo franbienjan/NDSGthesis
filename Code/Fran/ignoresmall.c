@@ -1,3 +1,5 @@
+
+
 //**********************************************************************
 //* TASKS TO COMPLETE:
 //* [X] Fix Bloom Filter Data Structure
@@ -23,81 +25,72 @@
 #include <stdlib.h>
 #include "bloom.h"
 
+#include <dirent.h>
+
 struct bloom bloom;
 
-void masterServer(FILE *f1, FILE *f2, FILE *f3) {
+void masterServer(FILE *f1, FILE *f2, char *buffer) {
 
-	char line[300], fullline[300], cacheline[300];
-	char *splithash[10];
+	char line[300], fullline[300];
+	char *token, **ptr;
+	char *splithash[8];
 	int i, j, a;
-	long num, entries = 0, hashcatalogentries = 0;
-	int nobloom = 0;
-	
+	long num;
+	long entries = 0;
+	long hashcatalogentries = 0;
+	FILE *f3;	
+	f3=fopen(buffer,"r+");
+
 	//check length of new input
 	while (fgets (line, 300, f1) != NULL) {
 		entries++;
 	}
-	
+
 	//check length of hashcatalog
 	while (fgets (line, 300, f2) != NULL) {
 		hashcatalogentries++;
 	}
-	
+
 	rewind(f1);
 	rewind(f2);
 	bloom_init(&bloom, hashcatalogentries + entries, 0.01);
-	
+
 	//add hashcatalog entries to bloom filter
 	while (fgets (line, 300, f2) != NULL) {
-	
+
 		i = 0;
 		splithash[i] = strtok(line, "|");
 		while (splithash[i] != NULL)
 			splithash[++i] = strtok(NULL, "|");
-		
+
 		bloom_add(&bloom, splithash[1], strlen(splithash[1]));
 	}
+
 	
 	//read list of updated files
 	while (fgets (line, 300, f1) != NULL) {
-		
+
 		i = 0;
-		fullline = line;
+		//fullline = line;
+		strcpy(fullline, line);
 		splithash[i] = strtok(line, "|");
 		while (splithash[i] != NULL)
 			splithash[++i] = strtok(NULL, "|");
-		
+
 		//Size Filter
 		num = atoi(splithash[2]);
 		if (num < 8000) {
 			continue;
 		}
-		
-		//Cache Check; NOTE: Hash lang ang nakastore sa Cache
-		/*while (fgets (cacheline, 300, f3) != NULL) {
-			cacheline[strlen(cacheline) - 1] = '\0';
-			if (splithash[1] == cacheline) {
-				printf("IT EXISTS SA CACHEEEEEEEEEEEE\n");
-				rewind(f2);
-				//do something about the folder madness here
-				//folderCache (splithash[0], f2, f3);
-				nobloom = 1;
-			} else
-				printf("WALA HUHUHU\n");
-		}*/
-		
-		//Nobloom = 1 if meron sa cache, no need to continue to bloom
-		if (nobloom) {
-			nobloom = 0;
-			continue;
-		}
-			
-		//Bloom Filter
+
+		//Bloom Filter		
 		if (bloom_add(&bloom, splithash[1], strlen(splithash[1])) == 0) {
 			fprintf(f2, "%s", fullline);
+			fprintf(f3, "%s", fullline);
 		}
 	}
-	
+	fclose(f3);
+
 }
 
 //Adding folders and files in File Cache
@@ -112,12 +105,31 @@ void folderCache (char *path, FILE *f2, FILE *f3) {
 
 main () {
 
-	FILE *f1, *f2, *f3;
-	f1 = fopen ("out.txt", "r");
-	f2 = fopen ("hashcatalog.txt", "r+");
-	f3 = fopen ("cache.txt", "r+");
-	
-	//Function to read file with hash functions and ignore small files
-	masterServer(f1, f2, f3);
-	
+	FILE *f1, *f2;
+	f2=fopen("hashcatalog.txt", "r+");
+
+
+	DIR *dir;
+    struct dirent *ent;
+	if (!(dir = opendir("./Outputs"))) return;
+    if (!(ent = readdir(dir))) return;
+    
+    do{
+
+    	
+    	if(strcmp(ent->d_name,"..")!=0 && strcmp(ent->d_name,".")!=0){
+    		char buffer[strlen(ent->d_name)+10];
+    		strcpy(buffer,"./Outputs/");
+    		strcat(buffer,ent->d_name);
+
+			if(strstr(buffer,".ret")!=NULL) continue;
+
+    		f1 = fopen (buffer, "r");
+    		strcat(buffer,".ret");
+    		
+    		//Function to read file with hash functions and ignore small files
+			masterServer(f1, f2,buffer);
+			fclose(f1);
+    	}
+   } while (ent = readdir(dir));
 }
