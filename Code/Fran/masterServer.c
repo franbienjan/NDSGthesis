@@ -62,7 +62,7 @@ void masterServer(FILE *f1, FILE *f2, FILE *f3) {
 	while (fgets (line, 300, f1) != NULL) {
 		
 		i = 0;
-		fullline = line;
+		//fullline = line;
 		splithash[i] = strtok(line, "|");
 		while (splithash[i] != NULL)
 			splithash[++i] = strtok(NULL, "|");

@@ -62,7 +62,6 @@ void masterServer(FILE *f1, FILE *f2, char *buffer) {
 		splithash[i] = strtok(line, "|");
 		while (splithash[i] != NULL)
 			splithash[++i] = strtok(NULL, "|");
-
 		bloom_add(&bloom, splithash[1], strlen(splithash[1]));
 	}
 
@@ -71,7 +70,6 @@ void masterServer(FILE *f1, FILE *f2, char *buffer) {
 	while (fgets (line, 300, f1) != NULL) {
 
 		i = 0;
-		//fullline = line;
 		strcpy(fullline, line);
 		splithash[i] = strtok(line, "|");
 		while (splithash[i] != NULL)
