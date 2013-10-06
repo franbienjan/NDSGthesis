@@ -25,13 +25,33 @@
 
 struct bloom bloom;
 
+//Adding folders and files in File Cache
+//Using path, get all strings in hashcatalog that start with the same path
+void folderCache (char *path, char *hash, FILE *f2, FILE *f3) {
+
+	char linus[300];	
+	
+	rewind(f2);
+	fclose(f3);
+	f3 = fopen("cache.txt", "w+");
+	
+	while (fgets (linus, 300, f2) != NULL) {
+		printf("RUMPLE %s", linus);
+		if (strncmp (path, linus, strlen(path)) == 0) {
+			fprintf(f3, "%s\n", hash);
+			printf("LOL %s\n", hash);
+		}
+	}
+	
+}
+
 void masterServer(FILE *f1, FILE *f2, FILE *f3) {
 
 	char line[300], fullline[300], cacheline[300];
 	char *splithash[10];
 	int i, j, a;
 	long num, entries = 0, hashcatalogentries = 0;
-	//int nobloom = 0;
+	int nobloom = 0;
 	
 	//check length of new input
 	while (fgets (line, 300, f1) != NULL) {
@@ -63,6 +83,7 @@ void masterServer(FILE *f1, FILE *f2, FILE *f3) {
 		
 		i = 0;
 		fullline = line;
+		printf("lol %s", fullline);
 		splithash[i] = strtok(line, "|");
 		while (splithash[i] != NULL)
 			splithash[++i] = strtok(NULL, "|");
@@ -72,41 +93,32 @@ void masterServer(FILE *f1, FILE *f2, FILE *f3) {
 		if (num < 8000) {
 			continue;
 		}
-		
+			
 		//Cache Check; NOTE: Hash lang ang nakastore sa Cache
-		/*while (fgets (cacheline, 300, f3) != NULL) {
+		while (fgets (cacheline, 300, f3) != NULL) {
 			cacheline[strlen(cacheline) - 1] = '\0';
+			printf("CHECK IN: %s | %s\n", splithash[1], cacheline);
+			
 			if (splithash[1] == cacheline) {
 				printf("IT EXISTS SA CACHEEEEEEEEEEEE\n");
-				rewind(f2);
-				//do something about the folder madness here
-				//folderCache (splithash[0], f2, f3);
-				nobloom = 1;
+				nobloom = 1;				
 			} else
 				printf("WALA HUHUHU\n");
-		}*/
+				
+		}
 		
 		//Nobloom = 1 if meron sa cache, no need to continue to bloom
-		/*if (nobloom) {
+		if (nobloom) {
 			nobloom = 0;
 			continue;
-		}*/
+		}
 			
 		//Bloom Filter
 		if (bloom_add(&bloom, splithash[1], strlen(splithash[1])) == 0) {
 			fprintf(f2, "%s", fullline);
+			folderCache (splithash[0], splithash[1], f2, f3);
 		}
 	}
-	
-}
-
-//Adding folders and files in File Cache
-void folderCache (char *path, FILE *f2, FILE *f3) {
-	
-	//Using path, get all strings in hashcatalog that start with the same path
-	
-	//strncmp
-	
 	
 }
 
