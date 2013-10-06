@@ -31,7 +31,7 @@ void masterServer(FILE *f1, FILE *f2, FILE *f3) {
 	char *splithash[10];
 	int i, j, a;
 	long num, entries = 0, hashcatalogentries = 0;
-	int nobloom = 0;
+	//int nobloom = 0;
 	
 	//check length of new input
 	while (fgets (line, 300, f1) != NULL) {
@@ -62,7 +62,7 @@ void masterServer(FILE *f1, FILE *f2, FILE *f3) {
 	while (fgets (line, 300, f1) != NULL) {
 		
 		i = 0;
-		//fullline = line;
+		fullline = line;
 		splithash[i] = strtok(line, "|");
 		while (splithash[i] != NULL)
 			splithash[++i] = strtok(NULL, "|");
@@ -87,10 +87,10 @@ void masterServer(FILE *f1, FILE *f2, FILE *f3) {
 		}*/
 		
 		//Nobloom = 1 if meron sa cache, no need to continue to bloom
-		if (nobloom) {
+		/*if (nobloom) {
 			nobloom = 0;
 			continue;
-		}
+		}*/
 			
 		//Bloom Filter
 		if (bloom_add(&bloom, splithash[1], strlen(splithash[1])) == 0) {
