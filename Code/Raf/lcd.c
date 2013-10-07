@@ -28,6 +28,7 @@
 // [] Possible problem: SHA-1 file-reading. (EOF?)
 // [] RESTORE FILES FROM CHUNKS
 // [] lolololol
+// [] when less than 4kb, do not chunk :|
 
 char *file_agent_dir = "./";
 char *file_agent_dir_system = "\"File Agent\"\\";
@@ -62,6 +63,7 @@ void getFileNames(){
 	int i = 0, j = 0;
 	
 	raf = fopen("./out.txt","r");
+	//raf = fopen("./uniquefiles.txt","r");
 	
 	
 	root = (struct files *)malloc(sizeof(struct files));

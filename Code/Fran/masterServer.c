@@ -164,6 +164,7 @@ main () {
 			char buffer[strlen(ent->d_name)+10];
     		strcpy(buffer,"./Outputs/");
     		strcat(buffer,ent->d_name);
+    		printf("\n%s",buffer);
 			
 			if(strstr(buffer,".ret")!=NULL) continue;
 
@@ -171,6 +172,7 @@ main () {
     		if(!f1) printf("\nno file:%s",buffer);
 
     		f2 = fopen ("hashcatalog.txt", "r+");
+    		//f2 = fopen ("../Raf/uniquefiles.txt", "r+");
 			f3 = fopen ("cache.txt", "r+");
 
 			strcat(buffer,".ret");

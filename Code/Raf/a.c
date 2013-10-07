@@ -289,7 +289,6 @@ char* getSha(char* fileDirectory, char* fileName){
     strcat(file,fileName);
     f=fopen(file,"rb");
     int size=getSize(file);
-
 	char string[size];
 
 	if(!f) return;
@@ -297,9 +296,9 @@ char* getSha(char* fileDirectory, char* fileName){
 	fseek(f, SEEK_SET, 0);
 
 
-	if(size==0) strcpy(string,"");
-	else while(fgets(buffer,20,f)!=NULL) strcat(string,buffer);
-
+	strcpy(string,"");
+	while(fgets(buffer,20,f)!=NULL) strcat(string,buffer);
+    if(size==0)strcpy(string,"");
 	
     test(SHA1Reset(&sha), "SHA1Reset");
     test(SHA1Input(&sha, string, size), "SHA1Input");
