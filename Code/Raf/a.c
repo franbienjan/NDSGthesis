@@ -9,7 +9,7 @@
 #include "sha1.h"
 
 // searches the string 'str' in file 'fname'
-int searchWord(char *fname, char *str) ;
+//int searchWord(char *fname, char *str) ;
 
 // gets the line in 'gg.txt' with the 'str' string
 char* getLine(char *str,FILE *f);
@@ -219,7 +219,7 @@ void compareFiles(const char *name, int level,FILE *f){
     
     closedir(dir);
 }
-
+/*
 int searchWord(char *fname, char *str) {
 	FILE *f;
 	int line_num = 1;
@@ -243,7 +243,7 @@ int searchWord(char *fname, char *str) {
 	
    	return 0;
 }
-
+*/
 char* getLine(char *str,FILE *f) {
 	char *temp=malloc(512);
 	char fname[strlen(str)+2];
@@ -260,10 +260,8 @@ char* getLine(char *str,FILE *f) {
 
 off_t getSize(const char *filename) {
     struct stat st; 
-
-    if (stat(filename, &st) == 0) return st.st_size;
-
-    return -1; 
+    if (stat(filename, &st)==0) return st.st_size;
+    return 0;
 }
 
 void test(int err, const char* msg) {
