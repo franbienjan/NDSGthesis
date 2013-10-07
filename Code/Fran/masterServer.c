@@ -23,15 +23,20 @@
 #include <stdlib.h>
 #include "bloom.h"
 
-struct bloom bloom;
+#include <dirent.h>
 
 //Adding folders and files in File Cache
 //Using path, get all strings in hashcatalog that start with the same path
 void folderCache (char *path, char *hash, FILE *f2, FILE *f3) {
 
-	char linus[300], *splithash[30], *splithash2[30];
+	char linus[300]="", *splithash[30], *splithash2[30];
 	int i = 0;
-	
+
+	for(i=0;i<30;i++){
+		splithash[i]=NULL;
+		splithash2[i]=NULL;
+	}
+	i=0;
 	rewind(f2);
 	fclose(f3);
 	f3 = fopen("cache.txt", "w+");
@@ -60,23 +65,32 @@ void folderCache (char *path, char *hash, FILE *f2, FILE *f3) {
 	
 }
 
-void masterServer(FILE *f1, FILE *f2, FILE *f3) {
+void masterServer(FILE *f1, FILE *f2, FILE *f3, char *buffer) {
 
-	char line[300], fullline[300], cacheline[300];
+	char	line[300]="",
+			fullline[300]="",
+			cacheline[300]="";
 	char *splithash[10];
-	int i, j, a;
+	int i;
 	long num, entries = 0, hashcatalogentries = 0;
 	int nobloom = 0;
-	
+	struct bloom bloom;
+	FILE *f4;	
+	f4=fopen(buffer,"w+");
+
+	for(i=0;i<10;i++) splithash[i]=NULL;
+
 	//check length of new input
 	while (fgets (line, 300, f1) != NULL) {
 		entries++;
 	}
+	//printf("\nEntries:%lu",entries);
 	
 	//check length of hashcatalog
 	while (fgets (line, 300, f2) != NULL) {
 		hashcatalogentries++;
 	}
+	//printf("\nHCE:%lu",hashcatalogentries);
 	
 	rewind(f1);
 	rewind(f2);
@@ -84,7 +98,6 @@ void masterServer(FILE *f1, FILE *f2, FILE *f3) {
 	
 	//add hashcatalog entries to bloom filter
 	while (fgets (line, 300, f2) != NULL) {
-	
 		i = 0;
 		splithash[i] = strtok(line, "|");
 		while (splithash[i] != NULL)
@@ -97,7 +110,7 @@ void masterServer(FILE *f1, FILE *f2, FILE *f3) {
 	while (fgets (line, 300, f1) != NULL) {
 		
 		i = 0;
-		fullline = line;
+		strcpy(fullline,line);
 		splithash[i] = strtok(line, "|");
 		while (splithash[i] != NULL)
 			splithash[++i] = strtok(NULL, "|");
@@ -112,12 +125,12 @@ void masterServer(FILE *f1, FILE *f2, FILE *f3) {
 		while (fgets (cacheline, 300, f3) != NULL) {
 			cacheline[strlen(cacheline) - 1] = '\0';
 			
-			printf("CHECK IN!! %s || %s\n", cacheline, splithash[1]);
+			//printf("CHECK IN!! %s || %s\n", cacheline, splithash[1]);
 			if (strcmp(splithash[1], cacheline) == 0) {
-				printf("IT EXISTS SA CACHEEEEEEEEEEEE\n");
+				//printf("IT EXISTS SA CACHEEEEEEEEEEEE\n");
 				nobloom = 1;				
-			} else
-				printf("WALA HUHUHU\n");
+			} else ;
+				//printf("WALA HUHUHU\n");
 				
 		}
 		
@@ -131,19 +144,41 @@ void masterServer(FILE *f1, FILE *f2, FILE *f3) {
 		if (bloom_add(&bloom, splithash[1], strlen(splithash[1])) == 0) {
 			folderCache (splithash[0], splithash[1], f2, f3);
 			fprintf(f2, "%s", fullline);
+			fprintf(f4, "%s", fullline);
 		}
 	}
+	fclose(f4);
 	
 }
 
 main () {
 
 	FILE *f1, *f2, *f3;
-	f1 = fopen ("out.txt", "r");
-	f2 = fopen ("hashcatalog.txt", "r+");
-	f3 = fopen ("cache.txt", "r+");
-	
-	//Function to read file with hash functions and ignore small files
-	masterServer(f1, f2, f3);
-	
+	DIR *dir;
+    struct dirent *ent;
+	if (!(dir = opendir("./Outputs"))) return;
+    if (!(ent = readdir(dir))) return;
+ 
+    do{
+		if(strcmp(ent->d_name,"..")!=0 && strcmp(ent->d_name,".")!=0){
+			char buffer[strlen(ent->d_name)+10];
+    		strcpy(buffer,"./Outputs/");
+    		strcat(buffer,ent->d_name);
+			
+			if(strstr(buffer,".ret")!=NULL) continue;
+
+			f1 = fopen (buffer, "r");
+    		if(!f1) printf("\nno file:%s",buffer);
+
+    		f2 = fopen ("hashcatalog.txt", "r+");
+			f3 = fopen ("cache.txt", "r+");
+
+			strcat(buffer,".ret");
+
+			masterServer(f1, f2, f3,buffer);
+
+			fclose(f2);
+			fclose(f3);
+		}
+	} while (ent = readdir(dir));
 }
