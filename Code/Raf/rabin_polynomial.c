@@ -194,7 +194,6 @@ char ** print_rabin_poly_list_to_file(FILE *out_file, struct rabin_polynomial *p
 	}
 	*/
     
-    
 	
 	return split_into_chunks(out_file,file_dest,fin,counter,lengthvalues,j-1); // added function
     
@@ -209,10 +208,11 @@ void print_rabin_poly_to_file(FILE *out_file, struct rabin_polynomial *poly,int 
     if(poly == NULL)
         return;
     
-   // fprintf(stdout, "%llu,%u %llu",poly->start,poly->length,poly->polynomial);
+    //fprintf(stdout, "%llu,%u %llu",poly->start,poly->length,poly->polynomial);
+    fprintf(stdout, "%lu,%u %lu",poly->start,poly->length,poly->polynomial);
 
-   // if(new_line)
-    //    fprintf(stdout, "\n");
+    if(new_line)
+        fprintf(stdout, "\n");
 }
 
 /*

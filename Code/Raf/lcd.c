@@ -229,8 +229,7 @@ void rabinChunking(){
 	//	printf("concat: %s\n",concat);
         chunknames = print_rabin_poly_list_to_file(fout,head,concat,fin); // [] modify to return array of chunknames per 1 file!!! , number of chunks == sizeof / length
 		
-	//	printf("MINDEX = %d\nMIN HASH = %s\nchunkcount = %d\n",mindex,minimum_sha,chunkcount);
-    
+		printf("MINDEX = %d\nMIN HASH = %s\nchunkcount = %d\n",mindex,minimum_sha,chunkcount);
     
     
 	// EXTREME BINNING
@@ -261,10 +260,17 @@ void rabinChunking(){
 		//	printf("concat: %s\n",concat);
 			bin = fopen(concat, "w");
 			
+			printf("i: %d\n",i);
+			//if(i==2){
+				printf("oyst %s\n",chunknames[64]);
+			//}
 			fprintf(bin,"%s\n",temp->filename);
 			for(k=0;k<cc;k++){
 				if(strcmp(temp->chunkID,chunknames[k])){ // if not primary
 					fprintf(bin,"%s\n",chunknames[k]); //might add chunk size later? (but it's pretty useless though)
+					//printf("%d: %s\n",k,chunknames[k]); //might add chunk size later? (but it's pretty useless though)
+
+				//	printf("hoeheoheohoheoheohoho %d\n",cc);
 				}
 			}
 			fclose(bin);
@@ -359,10 +365,10 @@ int main(){
     rabinChunking();
     
     // compare chunks
-    comparePrints();
+    //comparePrints();
     
     // remake new files from chunks
-    remakeFiles();
+    //remakeFiles();
     
 	
 	return 0;
