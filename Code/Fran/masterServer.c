@@ -29,19 +29,34 @@ struct bloom bloom;
 //Using path, get all strings in hashcatalog that start with the same path
 void folderCache (char *path, char *hash, FILE *f2, FILE *f3) {
 
-	char linus[300];	
+	char linus[300], *splithash[30], *splithash2[30];
+	int i = 0;
 	
 	rewind(f2);
 	fclose(f3);
 	f3 = fopen("cache.txt", "w+");
 	
+	splithash[i] = strtok(path, "/");
+	while (splithash[i] != NULL)
+		splithash[++i] = strtok(NULL, "/");
+
+	splithash[i-1] = '\0';
+	fprintf(f3, "%s\n", hash);
+	
 	while (fgets (linus, 300, f2) != NULL) {
-		printf("RUMPLE %s", linus);
-		if (strncmp (path, linus, strlen(path)) == 0) {
-			fprintf(f3, "%s\n", hash);
-			printf("LOL %s\n", hash);
+		
+		if (strncmp (*splithash, linus, strlen(*splithash)) == 0) {
+			
+			i = 0;
+			splithash2[i] = strtok(linus, "|");
+			while (splithash2[i] != NULL)
+				splithash2[++i] = strtok(NULL, "|");
+	
+			fprintf(f3, "%s\n", splithash2[1]);
 		}
 	}
+	
+	rewind(f3);
 	
 }
 
@@ -83,7 +98,6 @@ void masterServer(FILE *f1, FILE *f2, FILE *f3) {
 		
 		i = 0;
 		fullline = line;
-		printf("lol %s", fullline);
 		splithash[i] = strtok(line, "|");
 		while (splithash[i] != NULL)
 			splithash[++i] = strtok(NULL, "|");
@@ -97,9 +111,9 @@ void masterServer(FILE *f1, FILE *f2, FILE *f3) {
 		//Cache Check; NOTE: Hash lang ang nakastore sa Cache
 		while (fgets (cacheline, 300, f3) != NULL) {
 			cacheline[strlen(cacheline) - 1] = '\0';
-			printf("CHECK IN: %s | %s\n", splithash[1], cacheline);
 			
-			if (splithash[1] == cacheline) {
+			printf("CHECK IN!! %s || %s\n", cacheline, splithash[1]);
+			if (strcmp(splithash[1], cacheline) == 0) {
 				printf("IT EXISTS SA CACHEEEEEEEEEEEE\n");
 				nobloom = 1;				
 			} else
@@ -115,8 +129,8 @@ void masterServer(FILE *f1, FILE *f2, FILE *f3) {
 			
 		//Bloom Filter
 		if (bloom_add(&bloom, splithash[1], strlen(splithash[1])) == 0) {
-			fprintf(f2, "%s", fullline);
 			folderCache (splithash[0], splithash[1], f2, f3);
+			fprintf(f2, "%s", fullline);
 		}
 	}
 	
