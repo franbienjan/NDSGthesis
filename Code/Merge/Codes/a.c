@@ -50,16 +50,16 @@ void raf() {
         j=0,
         last=0;
     DIR *dir;
-    FolderList *folder, *head, *node;
+    FolderList *folder, *head, *node, *lastNode;
     struct dirent *ent;
     folder=(FolderList*)malloc(sizeof(FolderList));
 
-
+    lastNode=NULL;
     if (!(dir = opendir("."))) return;
     if (!(ent = readdir(dir))) return;
     do{
         if (ent->d_type == DT_DIR){
-            if(strcmp(ent->d_name,"..")!=0 && strcmp(ent->d_name,".")!=0 && strcmp(ent->d_name,"Codes")!=0 && strcmp(ent->d_name,"Outputs")!=0 ){
+            if(strcmp(ent->d_name,"..")!=0 && strcmp(ent->d_name,".")!=0 && strcmp(ent->d_name,"Codes")!=0 && strcmp(ent->d_name,"Outputs")!=0 && strcmp(ent->d_name,"chunkstempofolder")!=0){
                 if(folderNum==0){
                     folder->fname=ent->d_name;
                     head=folder;
@@ -82,7 +82,10 @@ void raf() {
                 printf("\n[%d] Initialize '%s'",i, head->fname);
                 head=head->next;
             }else{
-                if(i==folderNum+1) printf("\n[%d] %s",i,"Compare (the file last initialized)");
+            	if(i==folderNum+1){
+	            	if(lastNode==NULL) printf("\n[%d] Compare [No folder initialized yet]",i);
+	            	else printf("\n[%d] Compare [%s]",i,lastNode->fname);
+            	}
                 else printf("\n[%d] %s\n:",i,"Exit");
             }
         }
@@ -97,6 +100,7 @@ void raf() {
             file1=fopen("initFiles.txt","w+");
             initFileList(temp,0,file1);
             fclose(file1);
+            lastNode=head;
         }else if(i==folderNum+1){
             for(j=1 ; j<last ; j++) head=head->next;
             char temp[strlen(head->fname)+4];
@@ -165,40 +169,40 @@ void initFileList(const char *name, int level,FILE *f){
         //if file
         else{
         	len = snprintf(path, sizeof(path)-1, "%s", name);
-        	if(strcmp(ent->d_name,"a.c")!=0 && strcmp(ent->d_name,"a.out")!=0 && strcmp(ent->d_name,"sha1.c")!=0 && strcmp(ent->d_name,"sha1.h")!=0 && strcmp(ent->d_name,"out.txt")!=0 && strcmp(ent->d_name,"initFiles.txt")!=0) {
-        		
-        		char file[strlen(path)+strlen(ent->d_name)+1];
-        		strcpy(file,path);
-        		strcat(file,"/");
-        		strcat(file,ent->d_name);
+        	printf("\nscanning: %s",ent->d_name);
+        	//if(strcmp(ent->d_name,"a.c")!=0 && strcmp(ent->d_name,"a.out")!=0 && strcmp(ent->d_name,"sha1.c")!=0 && strcmp(ent->d_name,"sha1.h")!=0 && strcmp(ent->d_name,"out.txt")!=0 && strcmp(ent->d_name,"initFiles.txt")!=0) {        		
+    		char file[strlen(path)+strlen(ent->d_name)+1];
+    		strcpy(file,path);
+    		strcat(file,"/");
+    		strcat(file,ent->d_name);
 
-				stat(file, &b);
-        		//printf("%s|",getSha(path,ent->d_name));
-        		fprintf(f, "%s|", getSha(path,ent->d_name));
+			stat(file, &b);
+    		//printf("%s|",getSha(path,ent->d_name));
+    		fprintf(f, "%s|", getSha(path,ent->d_name));
 
-        		//printf("%lu|",getSize(file));
-        		fprintf(f, "%lu|", getSize(file));
+    		//printf("%lu|",getSize(file));
+    		fprintf(f, "%lu|", getSize(file));
 
-        		strftime(t, 100, "%m%d%Y-%H:%M:%S", localtime(&b.st_ctime));
-        		//printf("%s|",t);
-        		fprintf(f, "%s|",t);
+    		strftime(t, 100, "%m%d%Y-%H:%M:%S", localtime(&b.st_ctime));
+    		//printf("%s|",t);
+    		fprintf(f, "%s|",t);
 
-        		strftime(t, 100, "%m%d%Y-%H:%M:%S", localtime(&b.st_mtime));
-        		//printf("%s|",t);
-				fprintf(f, "%s|",t);
+    		strftime(t, 100, "%m%d%Y-%H:%M:%S", localtime(&b.st_mtime));
+    		//printf("%s|",t);
+			fprintf(f, "%s|",t);
 
-				strftime(t, 100, "%m%d%Y-%H:%M:%S|", localtime(&b.st_atime));
-				//printf("%s",t);
-				fprintf(f, "%s",t);
+			strftime(t, 100, "%m%d%Y-%H:%M:%S|", localtime(&b.st_atime));
+			//printf("%s",t);
+			fprintf(f, "%s",t);
 
-				//printf("%s\n",file);
-				strcpy(file,path);
-        		strcat(file,"/\"");
-        		strcat(file,ent->d_name);
-        		strcat(file,"\"");
-				fprintf(f, "%s\n",file);
+			//printf("%s\n",file);
+			strcpy(file,path);
+    		strcat(file,"/\"");
+    		strcat(file,ent->d_name);
+    		strcat(file,"\"");
+			fprintf(f, "%s\n",file);
 
-        	}	
+        	//}	
         }
 
     } while (ent = readdir(dir));
@@ -234,55 +238,53 @@ void compareFiles(const char *name, int level,FILE *f){
         //if file
         else{
         	len = snprintf(path, sizeof(path)-1, "%s", name);
-        	if(strcmp(ent->d_name,"a.c")!=0 && strcmp(ent->d_name,"a.out")!=0 && strcmp(ent->d_name,"sha1.c")!=0 && strcmp(ent->d_name,"sha1.h")!=0 && strcmp(ent->d_name,"out.txt")!=0 && strcmp(ent->d_name,"initFiles.txt")!=0) {
-        			strcpy(t,getLine(ent->d_name,f));
+        	//if(strcmp(ent->d_name,"a.c")!=0 && strcmp(ent->d_name,"a.out")!=0 && strcmp(ent->d_name,"sha1.c")!=0 && strcmp(ent->d_name,"sha1.h")!=0 && strcmp(ent->d_name,"out.txt")!=0 && strcmp(ent->d_name,"initFiles.txt")!=0) {
+			strcpy(t,getLine(ent->d_name,f));
 
-        			// aaaaaa.txt bug
-        			// if "a" is in file
+			// aaaaaa.txt bug
+			// if "a" is in file
 
-        			if(t!=NULL){
-        				if(strcmp(t,getSha(path,ent->d_name))!=0){
-        					char file[strlen(path)+strlen(ent->d_name)+1];
+			if(t!=NULL){
+				if(strcmp(t,getSha(path,ent->d_name))!=0){
+					char file[strlen(path)+strlen(ent->d_name)+1];
 
-        					// file path
-        					strcpy(file,path);
-        					strcat(file,"/");
-                            //strcat(file,"\"");
-		        			strcat(file,ent->d_name);
-                            //strcat(file,"\"");
-		        			strcpy(t, file);
+					// file path
+					strcpy(file,path);
+					strcat(file,"/");
+                    //strcat(file,"\"");
+        			strcat(file,ent->d_name);
+                    //strcat(file,"\"");
+        			strcpy(t, file);
 
-		        			strcat(t,"|");
+        			strcat(t,"|");
 
-		        			// file hash
-        					strcat(t, getSha(path,ent->d_name));
+        			// file hash
+					strcat(t, getSha(path,ent->d_name));
 
-        					strcat(t,"|");
+					strcat(t,"|");
 
-        					// file size
-        					char buffer[18];
-                            printf("\n%s is changed\n",file);
-        					sprintf(buffer, "%lu", getSize(file));
-        					strcat(t,buffer);
-							strcat(t,"|");
+					// file size
+					char buffer[18];
+                    printf("\n%s is changed\n",file);
+					sprintf(buffer, "%lu", getSize(file));
+					strcat(t,buffer);
+					strcat(t,"|");
 
-                            stat(file, &b);
-							strftime(buffer, 100, "%m%d%Y-%H:%M:%S|", localtime(&b.st_ctime));
-                            //printf("\n%s\n",buffer);
-							strcat(t,buffer);
+                    stat(file, &b);
+					strftime(buffer, 100, "%m%d%Y-%H:%M:%S|", localtime(&b.st_ctime));
+                    //printf("\n%s\n",buffer);
+					strcat(t,buffer);
 
-							strftime(buffer, 100, "%m%d%Y-%H:%M:%S|", localtime(&b.st_mtime));
-							strcat(t,buffer);
+					strftime(buffer, 100, "%m%d%Y-%H:%M:%S|", localtime(&b.st_mtime));
+					strcat(t,buffer);
 
-							strftime(buffer, 100, "%m%d%Y-%H:%M:%S", localtime(&b.st_atime));
-							strcat(t,buffer);
+					strftime(buffer, 100, "%m%d%Y-%H:%M:%S", localtime(&b.st_atime));
+					strcat(t,buffer);
 
-        					fprintf(file2, "%s\n",t);
-        				}
-        			}
-
-				
-        	}	
+					fprintf(file2, "%s\n",t);
+				}
+			}
+        	//}	
         }
 
     } while (ent = readdir(dir));
