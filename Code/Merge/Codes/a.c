@@ -29,6 +29,7 @@ void test(int err, const char* msg);
 // gets "sha-1"
 char* getSha(char* fileDirectory, char* fileName);
 
+long int convertUTF8ToUnicode(FILE *fileHandler, FILE *fOut, int c);
 // initializes initFiles.txt
 void callInit(char *str);
 /*
@@ -91,7 +92,7 @@ void raf() {
         }
         scanf("%d",&i);
         head=folder;
-        if(i<folderNum+1){
+        if(i<folderNum+1 && i>0){
             last=i;
             for(j=1 ; j<i ; j++) head=head->next;
             char temp[strlen(head->fname)+4];
@@ -115,9 +116,16 @@ void raf() {
             fclose(file1);
             fclose(file2);
             callInit(temp);
-        }else{
-            break;
-        }
+        }else if(i==0){
+            printf("ASPMOEFNEOWNFWEOFNEWOIFNOWEIFNWOE:IFNEW:FNWE:FNEWOIF");
+            FILE *ff;
+            ff=fopen("hashcatalog.txt","w");
+            fclose(ff);
+            ff=fopen("cache.txt","w");
+            fprintf(ff,"onwoief\n");
+            fclose(ff);
+
+        }else break;
     }while(1);
 /*
 
@@ -177,8 +185,31 @@ void initFileList(const char *name, int level,FILE *f){
     		strcat(file,ent->d_name);
 
 			stat(file, &b);
-    		//printf("%s|",getSha(path,ent->d_name));
-    		fprintf(f, "%s|", getSha(path,ent->d_name));
+
+            // for jpeg exceptions
+            
+            if(strstr(strrchr(ent->d_name, '.') , ".jpg")!=NULL){
+                FILE *tempF, *jpgF;
+                char tempStr[strlen(path)+strlen(ent->d_name)+1];
+                char tempStr2[strlen(ent->d_name)+4];
+
+                strcpy(tempStr,path);
+                strcat(tempStr,"/");
+                strcat(tempStr,ent->d_name);
+                //printf("\n%s",tempStr);
+
+                jpgF=fopen(tempStr,"r");
+                strcat(tempStr,".txt");
+                tempF=fopen(tempStr,"w");
+
+                convertUTF8ToUnicode(jpgF, tempF,0);
+                while(!feof(jpgF)) convertUTF8ToUnicode(jpgF, tempF,1);
+                strcpy(tempStr2,ent->d_name);
+                strcat(tempStr2,".txt");
+                fprintf(f, "%s|", getSha(path,tempStr2));
+                if(remove(tempStr)==0) printf("\nDeleted:%s",tempStr);
+
+            }else fprintf(f, "%s|", getSha(path,ent->d_name));
 
     		//printf("%lu|",getSize(file));
     		fprintf(f, "%lu|", getSize(file));
@@ -403,4 +434,26 @@ fclose(file1);
     file1=fopen("initFiles.txt","w+");
     initFileList(str,0,file1);
     fclose(file1);
+}
+
+long int convertUTF8ToUnicode(FILE *f, FILE *fOut, int c){
+
+    unsigned char charBuffer[1], helpBuffer[4];
+    long int unicodeValue;
+
+    fread(&charBuffer, sizeof(char), 1, f);
+    if (charBuffer[0] < 0x80) unicodeValue = charBuffer[0];
+    else if (charBuffer[0] < 0xc0) return -1;
+    else if (charBuffer[0] < 0xe0){
+        fread (&helpBuffer, sizeof(char), 2, f);
+        unicodeValue = ( (charBuffer[0]&0x1f ) << 6 ) + (helpBuffer[0]&0x3f );
+    }else if (charBuffer[0] < 0xf8) {
+        fread (&helpBuffer, sizeof(char), 3, f);
+        unicodeValue = ( (charBuffer[0]&0x0f ) << 12 ) + ((helpBuffer[0]&0x3f ) << 6 ) + (helpBuffer[1]&0x3f );
+    }else if (charBuffer[0] < 0xfc) {
+        fread (&helpBuffer, sizeof(char), 4, f);
+        unicodeValue = ((charBuffer[0] & 0x07) << 18) + ((helpBuffer[1]&0x3f ) << 12 ) + ((helpBuffer[1]&0x3f ) << 6 ) +     (helpBuffer[2]&0x3f );
+    }
+
+    if(c==1)fprintf(fOut,"%lu",unicodeValue);
 }

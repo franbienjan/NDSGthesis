@@ -259,11 +259,8 @@ void rabinChunking(){
 			strcat(concat,".bin");
 		//	printf("concat: %s\n",concat);
 			bin = fopen(concat, "w");
+
 			
-			printf("i: %d\n",i);
-			//if(i==2){
-				printf("oyst %s\n",chunknames[64]);
-			//}
 			fprintf(bin,"%s\n",temp->filename);
 			for(k=0;k<cc;k++){
 				if(strcmp(temp->chunkID,chunknames[k])){ // if not primary

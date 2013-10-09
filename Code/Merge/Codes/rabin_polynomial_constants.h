@@ -70,5 +70,5 @@
 
 //# of bytes to read at a time when reading through files
 #ifndef RAB_FILE_READ_BUF_SIZE
-#define RAB_FILE_READ_BUF_SIZE 1048576 // 1024 KB or 1MB
+#define RAB_FILE_READ_BUF_SIZE  5242880 //1048576 = 1024 KB or 1MB
 #endif
